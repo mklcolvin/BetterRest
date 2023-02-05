@@ -62,14 +62,6 @@ struct ContentView: View {
                 
             }  // end of Form
             .navigationTitle("BetterRest")
-//            .toolbar {
-//                Button("Calculate", action: calculateBedtime)
-//            }
-//            .alert(alertTitle, isPresented: $showingAlert) {
-//                Button("OK") { }
-//            } message: {
-//                Text(alertMessage)
-//            }
         }  // end of NavigationView
         
     }  // end of body
