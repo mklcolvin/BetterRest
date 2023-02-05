@@ -51,7 +51,13 @@ struct ContentView: View {
                 }  // End of Section
                 
                 Section(header: Text("Your bedtime should be:")) {
-                    Text(calculateBedtime())
+                    HStack {
+                        Text(calculateBedtime())
+                            .font(.largeTitle.weight(.semibold))
+                            .foregroundColor(.blue)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    
                 }
                 
             }  // end of Form
