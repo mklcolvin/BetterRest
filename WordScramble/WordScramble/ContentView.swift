@@ -94,7 +94,6 @@ struct ContentView: View {
         
         lengthWord = newWord.count
         userScore = userScore + lengthWord
-        print("Word length = \(lengthWord)")
         
         newWord = ""
         
@@ -105,7 +104,6 @@ struct ContentView: View {
             if let startWords = try? String(contentsOf: startWordsURL) {
                 let allWords = startWords.components(separatedBy: "\n")
                 rootWord = allWords.randomElement() ?? "silkworm"
-                userScore = userScore + lengthWord
                 return
             }
         }
@@ -117,6 +115,7 @@ struct ContentView: View {
         usedWords.removeAll()
         userScore = 0
         newWord = ""
+        startGame()
     }
     
     func isOriginal(word: String) -> Bool {
