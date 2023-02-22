@@ -112,7 +112,7 @@ struct ContentView: View {
             scoreTitle = "Correct!"
             userScore += 1
             withAnimation() {
-                        self.animationAmount += 360
+                        self.animationAmount += 360  // # of degrees to rotate flag
                     }
         }
         else
