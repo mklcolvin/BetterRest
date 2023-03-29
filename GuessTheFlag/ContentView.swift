@@ -44,7 +44,9 @@ struct ContentView: View {
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
     @State private var correctAnswer = Int.random(in: 0...2)
     
+    @State private var whichFlagTapped = 0          // Which flag was tapped
     @State private var animationAmount = 0.0
+    @State private var fade = false
     
     var body: some View {
         ZStack {
@@ -77,7 +79,15 @@ struct ContentView: View {
                             FlagImage(text: countries[number])
 
                         }
+                        .opacity((fade && (number != whichFlagTapped)) ? 0.25 : 1)
                         .rotation3DEffect(.degrees(number == correctAnswer ? self.animationAmount : 0), axis: (x: 0, y: 1, z: 0))
+//                        .onTapGesture() {
+//                            withAnimation(.linear(duration: 2)) {
+//                                fade.toggle()
+//                            }
+//                        }
+ 
+
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -110,20 +120,26 @@ struct ContentView: View {
     func flagTapped(_ number: Int) {
         if number == correctAnswer {
             scoreTitle = "Correct!"
+            whichFlagTapped = number
+            print("Correct Flag tapped = \(whichFlagTapped)")
             userScore += 1
+            fade.toggle()
             withAnimation() {
                         self.animationAmount += 360  // # of degrees to rotate flag
                     }
         }
         else
         {
+            whichFlagTapped = number
+            print("Wrong Flag tapped = \(whichFlagTapped)")
             scoreTitle = "Wrong!  That's the flag of \(countries[number])"
             userScore -= 1
+            fade = false
         }
         
         totalScore = userScore      //Keep a running total of the score
         showingScore = true
-        print("Number of Questions = \(numOfQuestions)")
+//        print("Number of Questions = \(numOfQuestions)")
     }
     
     func askQuestion() {
@@ -131,6 +147,7 @@ struct ContentView: View {
         correctAnswer = Int.random(in: 0...2)
         numOfQuestions += 1
         gameStatus(numOfQuestions)
+        whichFlagTapped = 0
     }
     
     func gameStatus(_ numQuest: Int) {
@@ -138,6 +155,7 @@ struct ContentView: View {
             gameOver = true
             numOfQuestions = 0
             userScore = 0
+            whichFlagTapped = 0
             scoreTitle = "Game OVER!"
         }
     }
