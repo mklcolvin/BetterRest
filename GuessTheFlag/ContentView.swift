@@ -118,6 +118,9 @@ struct ContentView: View {
     }
     
     func flagTapped(_ number: Int) {
+        
+        // Update score if the guess is correct
+        
         if number == correctAnswer {
             scoreTitle = "Correct!"
             whichFlagTapped = number
