@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation     // Audio support for sound effects
 
 struct ContentView: View {
     
@@ -19,10 +20,16 @@ struct ContentView: View {
     @State private var rightAnswerStatus = true
     @State private var randNum = 0
     @State private var gameRounds = 0
-    
-    @State private var animationAmount = 0
+    @State private var ballColor = Color.yellow
+    @State private var animationAmount = 0.0
+    @State private var gameOver = false
+    @State private var questionCount = 0
+
     
     private let questionRange = [5, 10, 20]
+    
+    @State private var cheerSoundEffect: AVAudioPlayer?
+    @State private var gaspSoundEffect: AVAudioPlayer?
     
     func startGame() {
         showStartPanel = false  // Hide the start panel
@@ -58,16 +65,56 @@ struct ContentView: View {
     func addNewPrompt() {
         usedPrompts.insert(promptLine + "     =         " + String(userAnswer ?? 0), at: 0)
         newRand()
+        questionCount += 1
+        gameStatus(questionCount)
 //        print("In addNewPrompt: userAnswer = \(userAnswer)")
         // exit if the remaining string is empty
 
         // extra validation to come
-        print("showStartPanel = \(showStartPanel)")
-        print("rightAnswerStatus = \(rightAnswerStatus)")
+//        print("showStartPanel = \(showStartPanel)")
+//        print("rightAnswerStatus = \(rightAnswerStatus)")
 
         userAnswer = nil      // reset the answer field
-//        print("New User Answer = \(userAnswer)")
 
+    }
+    
+    func gameStatus(_ currentQuestion: Int) {
+
+        //  Sets the gameOver flag if we've reached the max # of questions to be asked
+        print ("Current Question = \(currentQuestion),  Max Questions = \(numberOfQuestions)")
+        if currentQuestion > numberOfQuestions - 1 {
+            gameOver = true
+            numberOfQuestions = 0
+//            score = 0
+        }
+    }
+    
+    func playCorrectSound ()
+    {
+        let path = Bundle.main.path(forResource: "yay.mp3", ofType:nil)!
+        let url = URL(fileURLWithPath: path)
+        
+        do {
+            cheerSoundEffect = try AVAudioPlayer(contentsOf: url)
+            cheerSoundEffect?.play()
+        } catch {
+            // couldn't load file :(
+            print("Couldn't load yay.mp3")
+        }
+    }
+    
+    func playWrongSound ()
+    {
+        let path = Bundle.main.path(forResource: "gasp.mp3", ofType:nil)!
+        let url = URL(fileURLWithPath: path)
+        
+        do {
+            gaspSoundEffect = try AVAudioPlayer(contentsOf: url)
+            gaspSoundEffect?.play()
+        } catch {
+            // couldn't load file :(
+            print("Couldn't load gasp.mp3")
+        }
     }
     
     var body: some View {
@@ -82,8 +129,8 @@ struct ContentView: View {
                             
                             Picker("Number of Questions", selection: $numberOfQuestions)
                             {
-                                ForEach (0..<questionRange.count, id: \.self) { index in
-                                    Text("\(questionRange[index])")
+                                ForEach (questionRange, id: \.self) { index in
+                                    Text("\(index)")
 
                                 }
                             }
@@ -107,38 +154,63 @@ struct ContentView: View {
                     if !showStartPanel {
                         HStack {
                             Text("\(promptLine)")
-                            TextField("Enter your answer", value: $userAnswer,
-                                format: .number)
-                                .multilineTextAlignment(.trailing)
-                                .keyboardType(.numberPad)
+//                            TextField("Enter your answer", value: $userAnswer,
+//                                format: .number)
+//                                .multilineTextAlignment(.trailing)
+//                                .keyboardType(.numberPad)
                         }
                     }
                 }
+                if !showStartPanel {
+                    
                     Button("Submit")
                     {
                         rightAnswerStatus = checkAnswer(base: tableStart, multiplier: randNum, answer: userAnswer)
-                       // animate for correct answer
+                        // animate for correct answer
                         if rightAnswerStatus {
+                            self.ballColor = Color.green
+                            playCorrectSound()
                             score += 1
                         }
+                        else
+                        {
+                            self.ballColor = Color.red
+                            playWrongSound()
 
-
-//      Release the keyboard
+                        }
+                        
+                        withAnimation (.linear(duration: 2.0)) {
+                            animationAmount += 360
+                            self.ballColor = Color.yellow
+                            
+                        }
+                        
+                        //      Release the keyboard
                         
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         addNewPrompt()
                     }
                     .bold()
+                }
+                    
 
                 if !showStartPanel {
                     ZStack {
                         Circle()
-                            .foregroundColor(.green)
-                            .animation(.easeInOut(duration: 2), value: 1)
+        //                    .fill (LinearGradient(colors: [.green, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .fill(ballColor)
                         
-                        Text("\(userAnswer ?? 0)")
-                            .frame(width: 40, height: 40)
+                        TextField("Enter Answer Here", value: $userAnswer, format: .number)
+                            .frame(maxWidth: .infinity)
+                            .multilineTextAlignment(.center)
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                            .keyboardType(.numberPad)
+                        
                     }
+                    .rotation3DEffect(.degrees(animationAmount), axis: (x: 0.5, y: 0.5, z: 1))
+
+
                 }
 
       
@@ -172,7 +244,11 @@ struct ContentView: View {
             }
 
         }  // End of NavigationView
-
+        .alert("End of Game Reached", isPresented: $gameOver) {
+           // Button goes here
+        } message: {
+            Text("Your Final Score is \(score)")
+        }
     }  // End of View
 }
 
