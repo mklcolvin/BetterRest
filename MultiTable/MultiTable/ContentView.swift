@@ -24,13 +24,13 @@ struct ContentView: View {
     @State private var animationAmount = 0.0
     @State private var gameOver = false
     @State private var questionCount = 0
-
-    
-    private let questionRange = [5, 10, 20]
-    
     @State private var cheerSoundEffect: AVAudioPlayer?
     @State private var gaspSoundEffect: AVAudioPlayer?
-    
+    @State private var streakCount = 0             // Keeps track of streaks of 3 correct answers in a row
+
+    private let questionRange = [5, 10, 20]
+    private var answerTracker = [false, false, false]
+
     func startGame() {
         showStartPanel = false  // Hide the start panel
         userAnswer = nil
@@ -119,6 +119,20 @@ struct ContentView: View {
         }
     }
     
+    func playAwesomeSound ()
+    {
+        let path = Bundle.main.path(forResource: "awesome.mp3", ofType:nil)!
+        let url = URL(fileURLWithPath: path)
+        
+        do {
+            gaspSoundEffect = try AVAudioPlayer(contentsOf: url)
+            gaspSoundEffect?.play()
+        } catch {
+            // couldn't load file :(
+            print("Couldn't load awesome.mp3")
+        }
+    }
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -171,13 +185,21 @@ struct ContentView: View {
                         // animate for correct answer
                         if rightAnswerStatus {
                             self.ballColor = Color.green
-                            playCorrectSound()
+                            streakCount += 1            // bump up the streak count
+                            print("Streak Count = \(streakCount)")
+                            if streakCount >= 3 {
+                                playAwesomeSound()
+                                streakCount = 0
+                            } else {
+                                playCorrectSound()
+                            }
                             score += 1
                         }
                         else
                         {
                             self.ballColor = Color.red
                             playWrongSound()
+                            streakCount = 0         // resets the streak, if there was one!
 
                         }
                         
@@ -250,7 +272,7 @@ struct ContentView: View {
            // Button goes here
             Button("New Game", action: restartGame)
         } message: {
-            Text("Your Final Score is \(score)")
+            Text("You got \(score) out of \(questionCount) questions right!")
         }
     }  // End of View
 }
