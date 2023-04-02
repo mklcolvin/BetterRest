@@ -38,6 +38,9 @@ struct ContentView: View {
     
     func restartGame() {
         showStartPanel = true // Show the start panel
+        usedPrompts.removeAll()     // clears the past record of prompts
+        questionCount = 0           // sets the question count back to zero
+        score = 0                   // reset the score
     }
     
     func generateRandom() -> Int {
@@ -85,7 +88,6 @@ struct ContentView: View {
         if currentQuestion > numberOfQuestions - 1 {
             gameOver = true
             numberOfQuestions = 0
-//            score = 0
         }
     }
     
@@ -246,6 +248,7 @@ struct ContentView: View {
         }  // End of NavigationView
         .alert("End of Game Reached", isPresented: $gameOver) {
            // Button goes here
+            Button("New Game", action: restartGame)
         } message: {
             Text("Your Final Score is \(score)")
         }
