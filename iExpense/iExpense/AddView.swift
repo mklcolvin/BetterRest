@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AddView: View {
     
-    @ObservedObject var expenses: Expenses
+    @Binding var expenses: Expenses
     @Environment(\.dismiss) var dismiss
     
     
@@ -36,6 +36,7 @@ struct AddView: View {
             .toolbar {
                 Button("Save") {
                     let item = ExpenseItem(name: name, type: type, amount: amount)
+
                     expenses.items.append(item)
                     dismiss()
                 }
@@ -45,7 +46,10 @@ struct AddView: View {
 }
 
 struct AddView_Previews: PreviewProvider {
+    
+    @State static var expenses = Expenses()
+
     static var previews: some View {
-        AddView(expenses: Expenses())
+        AddView(expenses: $expenses)
     }
 }

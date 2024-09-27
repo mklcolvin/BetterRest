@@ -1,5 +1,5 @@
 //
-//  AddView.swift
+//  ShowView.swift
 //  iExpense
 //
 //  Created by Mike Colvin on 4/14/23.
@@ -7,11 +7,13 @@
 
 import SwiftUI
 
-struct AddView: View {
+struct ShowView: View {
     
-    @ObservedObject var expenses: Expenses
+//    @Binding var expenses: Expenses
+    
+    var item: ExpenseItem
+    
     @Environment(\.dismiss) var dismiss
-    
     
     @State private var name = ""
     @State private var type = "Personal"
@@ -22,21 +24,40 @@ struct AddView: View {
     var body: some View {
         NavigationView {
             Form {
-                TextField("Name", text: $name)
-                
-                Picker("Type", selection: $type) {
-                    ForEach(types, id: \.self) {
-                        Text($0)
+                VStack {
+                    HStack {
+                        Text("Name:")
+                            .bold()
+                        Text(item.name)
+                        
                     }
+                    HStack {
+                        Text("Type: ")
+                            .bold()
+                        Text(item.type)
+                    }
+                    HStack {
+                        Text("Amount: ")
+                            .bold()
+                        Text(String(item.amount))
+                    }
+                   
                 }
-                TextField("Amount", value: $amount, format: .currency(code: "USD"))
-                    .keyboardType(.decimalPad)
+    
+                
+//                Picker("Type", selection: $type) {
+//                    ForEach(types, id: \.self) {
+//                        Text($0)
+//                    }
+//                }
+//                TextField("Amount", value: $amount, format: .currency(code: "USD"))
+//                    .keyboardType(.decimalPad)
             }
-            .navigationTitle("Add New Expense")
+            .navigationTitle("Show Expense")
             .toolbar {
-                Button("Save") {
-                    let item = ExpenseItem(name: name, type: type, amount: amount)
-                    expenses.items.append(item)
+                Button("Done") {
+//                    let item = ExpenseItem(name: name, type: type, amount: amount)
+//                    expenses.items.append(item)
                     dismiss()
                 }
             }
@@ -44,8 +65,11 @@ struct AddView: View {
     }
 }
 
-struct AddView_Previews: PreviewProvider {
+struct ShowView_Previews: PreviewProvider {
+    
+    @State static var expenses = Expenses()
+    
     static var previews: some View {
-        AddView(expenses: Expenses())
+        ShowView(item: expenses.items[0])
     }
 }
